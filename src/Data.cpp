@@ -17,6 +17,7 @@ namespace StatSim {
 		std::generate_n(std::back_inserter(m_Data), size, [&]() {
 			return distribution->Generate();
 		});
+		std::sort(m_Data.begin(), m_Data.end());
 	}
 	Data::Data(std::vector<double>&& data, Distribution* distribution) noexcept
 		: m_Data(std::move(data)), m_Distribution(distribution) {}
@@ -83,6 +84,9 @@ namespace StatSim {
 namespace StatSim {
 	static std::mt19937 g_Random(std::random_device{}());
 
+	Population::Population(std::vector<double>&& data, Distribution* distribution) noexcept
+		: Data(std::move(data), distribution) {}
+
 	Population::Population(int size, Distribution* distribution)
 		: Data(size, distribution) {}
 	Population::~Population() {
@@ -107,6 +111,8 @@ namespace StatSim {
 		} else {
 			std::sample(begin(), end(), std::back_inserter(sample), size, g_Random);
 		}
+
+		std::sort(sample.begin(), sample.end());
 		return m_Samples[size].emplace_back(new StatSim::Sample(this, m_SampleCount++, std::move(sample), GetDistribution()->Copy()));
 	}
 	const StatSim::Sample* Population::GetSample(int index) const {
@@ -133,6 +139,16 @@ namespace StatSim {
 	}
 	int Population::GetSampleCount() const noexcept {
 		return m_SampleCount;
+	}
+	Population* Population::CreateSampleMeanPopulation(int size) const {
+		std::vector<double> sampleMeans;
+		for (const auto* sample : m_Samples.at(size)) {
+			sampleMeans.push_back(sample->GetMean());
+		}
+
+		std::sort(sampleMeans.begin(), sampleMeans.end());
+		return new Population(std::move(sampleMeans),
+			new NormalDistribution(GetDistribution()->GetMean(), GetDistribution()->GetStandardDeviation() / std::sqrt(size)));
 	}
 }
 

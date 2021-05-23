@@ -51,6 +51,9 @@ namespace StatSim {
 		std::map<int, std::vector<StatSim::Sample*>> m_Samples;
 		int m_SampleCount = 0;
 
+	private:
+		Population(std::vector<double>&& data, Distribution* distribution) noexcept;
+
 	public:
 		Population(int size, Distribution* distribution);
 		Population(const Population&) = delete;
@@ -70,6 +73,7 @@ namespace StatSim {
 		std::map<int, std::vector<const StatSim::Sample*>> GetSamples() const;
 		std::map<int, std::vector<StatSim::Sample*>> GetSamples();
 		int GetSampleCount() const noexcept;
+		Population* CreateSampleMeanPopulation(int size) const;
 	};
 
 	class Sample final : public Data {
