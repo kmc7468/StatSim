@@ -157,7 +157,7 @@ int main() {
 			}
 			}
 		} else {
-			switch (ReadAction("동작", 4, "1. 출력\n2. 확률분포\n3. 표본조사\n4. 모집단 선택")) {
+			switch (ReadAction("동작", 5, "1. 출력\n2. 확률분포\n3. 표본조사\n4. 모평균 추정\n5. 모집단 선택")) {
 			case 1:
 				simulator.PrintSelectedData();
 				std::cout << '\n';
@@ -183,7 +183,19 @@ int main() {
 				break;
 			}
 
-			case 4:
+			case 4: {
+				StatSim::Sample* const sample = static_cast<StatSim::Sample*>(data);
+				StatSim::Population* const population = sample->GetPopulation();
+
+				const double statPopMean = population->GetMean(), statMean = data->GetMean(), errMean = statPopMean - statMean;
+				const double statStandardDeviation = data->GetStandardDeviation();
+				const double reliMean = 0.5 * std::erfc(-(errMean / statStandardDeviation) * std::sqrt(0.5)) -
+					0.5 * std::erfc(-(-errMean / statStandardDeviation) * std::sqrt(0.5));
+				std::cout << "통계적 모평균: " << statPopMean << "\n통계적 표본평균: " << statMean << "\n신뢰도 " << std::abs(reliMean * 100) << "% 구간 내에 통계적 모평균이 존재합니다.\n";
+				break;
+			}
+
+			case 5:
 				simulator.SelectPopulation();
 				break;
 			}
