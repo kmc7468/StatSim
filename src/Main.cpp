@@ -129,7 +129,7 @@ int main() {
 				for (int i = 0; i < loop; ++i) {
 					StatSim::Sample* const sample = population->Sample(size, enableReplacement);
 					if (i == 0) {
-						firstSample = sample;
+						lastSample = firstSample = sample;
 					} else if (i + 1 == loop) {
 						lastSample = sample;
 					}
