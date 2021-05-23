@@ -33,6 +33,26 @@ namespace StatSim {
 }
 
 namespace StatSim {
+	RandomVariable::RandomVariable(Interval interval, double distance) noexcept
+		: m_Interval(interval), m_Distance(distance) {
+		assert(distance >= 0);
+	}
+
+	Interval RandomVariable::GetInterval() const noexcept {
+		return m_Interval;
+	}
+	double RandomVariable::GetDistance() const noexcept {
+		return m_Distance;
+	}
+	bool RandomVariable::IsDiscrete() const noexcept {
+		return m_Distance != 0;
+	}
+	bool RandomVariable::IsContinuous() const noexcept {
+		return m_Distance == 0;
+	}
+}
+
+namespace StatSim {
 	double Distribution::GetVariance() const {
 		return std::pow(GetStandardDeviation(), 2);
 	}

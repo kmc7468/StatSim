@@ -10,7 +10,7 @@ namespace StatSim {
 
 	private:
 		double m_Begin, m_End;
-		bool m_IsBeginOpen = false, m_IsEndOpen = false;
+		bool m_IsBeginOpen, m_IsEndOpen;
 
 	public:
 		Interval(double begin, double end) noexcept;
@@ -26,6 +26,28 @@ namespace StatSim {
 		double GetEnd() const noexcept;
 		bool IsBeginOpen() const noexcept;
 		bool IsEndOpen() const noexcept;
+	};
+}
+
+namespace StatSim {
+	class RandomVariable final {
+	private:
+		Interval m_Interval;
+		double m_Distance;
+
+	public:
+		RandomVariable(Interval interval, double distance) noexcept;
+		RandomVariable(const RandomVariable& randomVariable) noexcept = default;
+		~RandomVariable() = default;
+
+	public:
+		RandomVariable& operator=(const RandomVariable& randomVariable) = default;
+
+	public:
+		Interval GetInterval() const noexcept;
+		double GetDistance() const noexcept;
+		bool IsDiscrete() const noexcept;
+		bool IsContinuous() const noexcept;
 	};
 }
 
