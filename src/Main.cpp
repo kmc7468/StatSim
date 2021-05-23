@@ -9,6 +9,7 @@ int ReadAction(const char* name, int max, const std::string_view& actions);
 
 int main() {
 	StatSim::Simulator simulator;
+	std::cout << std::fixed;
 
 	// 1. 모집단 생성
 	const int populationSize = ReadInput<int>("모집단의 크기");
