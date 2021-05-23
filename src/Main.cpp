@@ -72,8 +72,23 @@ int main() {
 				const auto samples = population->GetSamples();
 				for (const auto& [size, samples] : samples) {
 					std::cout << "n=" << size << "ÀÎ Ç¥º»\n";
-					for (const auto* sample : samples) {
-						std::cout << "- " << sample->GetName() << '\n';
+
+					StatSim::Sample* firstSample = nullptr;
+					for (int i = 0; i < static_cast<int>(samples.size()); ++i) {
+						if (firstSample == nullptr) {
+							firstSample = samples[i];
+						}
+
+						while (i + 1 < static_cast<int>(samples.size()) && samples[i + 1]->GetIndex() == samples[i]->GetIndex() + 1) {
+							++i;
+						}
+
+						if (firstSample == samples[i]) {
+							std::cout << "- " << firstSample->GetName() << '\n';
+						} else {
+							std::cout << "- " << firstSample->GetName() << " ~ " << samples[i]->GetName() << '\n';
+						}
+						firstSample = nullptr;
 					}
 
 					StatSim::Population* const sampleMeans = population->CreateSampleMeanPopulation(size);
