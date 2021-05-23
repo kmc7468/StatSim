@@ -2,8 +2,11 @@
 
 #include <cassert>
 #include <cmath>
+#include <sstream>
 
 namespace StatSim {
+	const Interval Interval::Real(-Interval::Infinity, Interval::Infinity);
+
 	Interval::Interval(double begin, double end) noexcept
 		: Interval(begin, true, end, true) {}
 	Interval::Interval(double begin, bool isBeginOpen, double end, bool isEndOpen) noexcept
@@ -53,10 +56,74 @@ namespace StatSim {
 }
 
 namespace StatSim {
+	static std::mt19937 g_Random(std::random_device{}());
+
 	double Distribution::GetVariance() const {
 		return std::pow(GetStandardDeviation(), 2);
 	}
 	double Distribution::GetStandardDeviation() const {
 		return std::sqrt(GetVariance());
+	}
+}
+
+namespace StatSim {
+	BinomialDistribution::BinomialDistribution(int tryCount, double probability) noexcept
+		: m_Distribution(tryCount, probability) {}
+
+	std::string BinomialDistribution::GetName() const {
+		return "이항분포";
+	}
+	std::string BinomialDistribution::GetExpression() const {
+		std::ostringstream oss;
+		oss << "B(" << GetTryCount() << ", " << GetProbability() << ')';
+		return oss.str();
+	}
+	RandomVariable BinomialDistribution::GetRandomVariable() const noexcept {
+		return { { 0.0, (double)GetTryCount() }, 1 };
+	}
+
+	double BinomialDistribution::GetMean() const {
+		return GetTryCount() * GetProbability();
+	}
+	double BinomialDistribution::GetVariance() const {
+		return GetTryCount() * GetProbability() * (1 - GetProbability());
+	}
+
+	double BinomialDistribution::Generate() {
+		return m_Distribution(g_Random);
+	}
+	int BinomialDistribution::GetTryCount() const noexcept {
+		return m_Distribution.t();
+	}
+	double BinomialDistribution::GetProbability() const noexcept {
+		return m_Distribution.p();
+	}
+}
+
+namespace StatSim {
+	NormalDistribution::NormalDistribution(double mean, double standardDeviation) noexcept
+		: m_Distribution(mean, standardDeviation) {}
+
+	std::string NormalDistribution::GetName() const {
+		return "정규분포";
+	}
+	std::string NormalDistribution::GetExpression() const {
+		std::ostringstream oss;
+		oss << "N(" << GetMean() << ", " << GetStandardDeviation() << "²)";
+		return oss.str();
+	}
+	RandomVariable NormalDistribution::GetRandomVariable() const noexcept {
+		return { Interval::Real, 0 };
+	}
+
+	double NormalDistribution::GetMean() const {
+		return m_Distribution.mean();
+	}
+	double NormalDistribution::GetStandardDeviation() const {
+		return m_Distribution.stddev();
+	}
+
+	double NormalDistribution::Generate() {
+		return m_Distribution(g_Random);
 	}
 }
