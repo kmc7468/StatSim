@@ -67,6 +67,7 @@ namespace StatSim {
 		virtual std::string GetName() const = 0;
 		virtual std::string GetExpression() const = 0;
 		virtual RandomVariable GetRandomVariable() const noexcept = 0;
+		virtual Distribution* Copy() const = 0;
 
 		virtual double GetMean() const = 0;
 		virtual double GetVariance() const;
@@ -91,6 +92,7 @@ namespace StatSim {
 		virtual std::string GetName() const override;
 		virtual std::string GetExpression() const override;
 		virtual RandomVariable GetRandomVariable() const noexcept override;
+		virtual Distribution* Copy() const override;
 
 		virtual double GetMean() const override;
 		virtual double GetVariance() const override;
@@ -116,6 +118,7 @@ namespace StatSim {
 		virtual std::string GetName() const override;
 		virtual std::string GetExpression() const override;
 		virtual RandomVariable GetRandomVariable() const noexcept override;
+		virtual Distribution* Copy() const override;
 
 		virtual double GetMean() const override;
 		virtual double GetStandardDeviation() const override;

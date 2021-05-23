@@ -81,6 +81,9 @@ namespace StatSim {
 	RandomVariable BinomialDistribution::GetRandomVariable() const noexcept {
 		return { { 0.0, (double)GetTryCount() }, 1 };
 	}
+	Distribution* BinomialDistribution::Copy() const {
+		return new BinomialDistribution(GetTryCount(), GetProbability());
+	}
 
 	double BinomialDistribution::GetMean() const {
 		return GetTryCount() * GetProbability();
@@ -114,6 +117,9 @@ namespace StatSim {
 	}
 	RandomVariable NormalDistribution::GetRandomVariable() const noexcept {
 		return { Interval::Real, 0 };
+	}
+	Distribution* NormalDistribution::Copy() const {
+		return new NormalDistribution(GetMean(), GetStandardDeviation());
 	}
 
 	double NormalDistribution::GetMean() const {
