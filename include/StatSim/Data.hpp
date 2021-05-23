@@ -2,6 +2,7 @@
 
 #include <StatSim/Distribution.hpp>
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -47,7 +48,8 @@ namespace StatSim {
 
 	class Population final : public Data {
 	private:
-		std::vector<StatSim::Sample*> m_Samples;
+		std::map<int, std::vector<StatSim::Sample*>> m_Samples;
+		int m_SampleCount = 0;
 
 	public:
 		Population(int size, Distribution* distribution);
@@ -63,6 +65,10 @@ namespace StatSim {
 		virtual std::string GetName() const override;
 
 		StatSim::Sample* Sample(int size, bool enableReplacement);
+		const StatSim::Sample* GetSample(int index) const;
+		StatSim::Sample* GetSample(int index);
+		std::map<int, std::vector<const StatSim::Sample*>> GetSamples() const;
+		std::map<int, std::vector<StatSim::Sample*>> GetSamples();
 		int GetSampleCount() const noexcept;
 	};
 
@@ -83,6 +89,9 @@ namespace StatSim {
 
 	public:
 		virtual std::string GetName() const override;
+		const Population* GetPopulation() const noexcept;
+		Population* GetPopulation() noexcept;
+		int GetIndex() const noexcept;
 
 		virtual double GetVariance() const override;
 	};

@@ -86,8 +86,10 @@ namespace StatSim {
 	Population::Population(int size, Distribution* distribution)
 		: Data(size, distribution) {}
 	Population::~Population() {
-		for (StatSim::Sample* sample : m_Samples) {
-			delete sample;
+		for (auto& [size, samples] : m_Samples) {
+			for (auto* sample : samples) {
+				delete sample;
+			}
 		}
 	}
 
@@ -105,10 +107,32 @@ namespace StatSim {
 		} else {
 			std::sample(begin(), end(), std::back_inserter(sample), size, g_Random);
 		}
-		return m_Samples.emplace_back(new StatSim::Sample(this, GetSampleCount(), std::move(sample), GetDistribution()->Copy()));
+		return m_Samples[size].emplace_back(new StatSim::Sample(this, m_SampleCount++, std::move(sample), GetDistribution()->Copy()));
+	}
+	const StatSim::Sample* Population::GetSample(int index) const {
+		return const_cast<Population*>(this)->GetSample(index);
+	}
+	StatSim::Sample* Population::GetSample(int index) {
+		for (auto& [size, samples] : m_Samples) {
+			const auto iter = std::find_if(samples.begin(), samples.end(), [&](const auto* sample) {
+				return sample->GetIndex() == index;
+			});
+			if (iter != samples.end()) return *iter;
+		}
+		return nullptr;
+	}
+	std::map<int, std::vector<const StatSim::Sample*>> Population::GetSamples() const {
+		std::map<int, std::vector<const StatSim::Sample*>> result;
+		for (const auto& [size, samples] : m_Samples) {
+			result[size] = { samples.begin(), samples.end() };
+		}
+		return result;
+	}
+	std::map<int, std::vector<StatSim::Sample*>> Population::GetSamples() {
+		return m_Samples;
 	}
 	int Population::GetSampleCount() const noexcept {
-		return static_cast<int>(m_Samples.size());
+		return m_SampleCount;
 	}
 }
 
@@ -120,6 +144,15 @@ namespace StatSim {
 
 	std::string Sample::GetName() const {
 		return "Ç¥º» #" + std::to_string(m_Index);
+	}
+	const Population* Sample::GetPopulation() const noexcept {
+		return m_Population;
+	}
+	Population* Sample::GetPopulation() noexcept {
+		return m_Population;
+	}
+	int Sample::GetIndex() const noexcept {
+		return m_Index;
 	}
 
 	double Sample::GetVariance() const {
