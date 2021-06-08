@@ -33,6 +33,9 @@ namespace StatSim {
 	bool Interval::IsEndOpen() const noexcept {
 		return m_IsEndOpen;
 	}
+	double Interval::GetLength() const noexcept {
+		return m_End - m_Begin;
+	}
 
 	bool Interval::IsElement(double value) const noexcept {
 		const double differenceFromBegin = value - m_Begin;
@@ -44,7 +47,9 @@ namespace StatSim {
 
 namespace StatSim {
 	RandomVariable::RandomVariable(Interval interval, double center, double distance) noexcept
-		: m_Interval(interval), m_Center(center), m_Distance(distance) {}
+		: m_Interval(interval), m_Center(center), m_Distance(distance) {
+		assert(interval.GetLength() > 0);
+	}
 
 	RandomVariable RandomVariable::Discrete(Interval interval, double center, double distance) {
 		assert(interval.IsElement(center));

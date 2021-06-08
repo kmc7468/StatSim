@@ -28,6 +28,7 @@ namespace StatSim {
 		double GetEnd() const noexcept;
 		bool IsBeginOpen() const noexcept;
 		bool IsEndOpen() const noexcept;
+		double GetLength() const noexcept;
 
 		bool IsElement(double value) const noexcept;
 	};
