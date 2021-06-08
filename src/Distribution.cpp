@@ -2,6 +2,9 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstdio>
+#include <memory>
+#include <iomanip>
 #include <sstream>
 
 namespace StatSim {
@@ -154,5 +157,51 @@ namespace StatSim {
 
 	double NormalDistribution::Generate() {
 		return m_Distribution(g_Random);
+	}
+}
+
+namespace StatSim {
+	PDFProgram PDFProgram::Load(const std::string_view& programPath) {
+		PDFProgram result;
+		result.m_ProgramPath = programPath;
+
+		const int implementationLevel = static_cast<int>(result.GetValue("ILVL", 0));
+		result.m_HasCDF = (implementationLevel >= 1);
+		result.m_HasICDF = (implementationLevel >= 2);
+
+		// TODO
+
+		return result;
+	}
+
+	double PDFProgram::PDF(double x) const {
+		return GetValue("PDF", x);
+	}
+	double PDFProgram::CDF(double x) const {
+		if (m_HasCDF) return GetValue("CDF", x);
+
+		// TODO
+	}
+	double PDFProgram::ICDF(double x) const {
+		if (m_HasICDF) return GetValue("ICDF", x);
+
+		// TODO
+	}
+
+	double PDFProgram::GetValue(const std::string_view& command, double x) const {
+		std::ostringstream commandGenerator;
+		commandGenerator << m_ProgramPath << ' ' << command << ' ' << std::fixed << x;
+
+		FILE* const program = _popen(commandGenerator.str().c_str(), "r");
+		assert(program);
+
+		const std::unique_ptr<FILE, decltype(&_pclose)> programRaii(program, _pclose);
+		std::string output;
+
+		char buffer[128];
+		while (fgets(buffer, sizeof(buffer), program)) {
+			output += buffer;
+		}
+		return std::stod(output);
 	}
 }

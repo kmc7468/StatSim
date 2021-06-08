@@ -3,6 +3,7 @@
 #include <numeric>
 #include <random>
 #include <string>
+#include <string_view>
 
 namespace StatSim {
 	class Interval final {
@@ -134,5 +135,35 @@ namespace StatSim {
 		virtual double GetStandardDeviation() const override;
 
 		virtual double Generate() override;
+	};
+}
+
+namespace StatSim {
+	class PDFProgram {
+	private:
+		std::string m_ProgramPath;
+		bool m_HasCDF = false, m_HasICDF = false;
+
+	private:
+		PDFProgram() noexcept = default;
+
+	public:
+		PDFProgram(const PDFProgram& pdfProgram) = default;
+		PDFProgram(PDFProgram&& pdfProgram) noexcept = default;
+
+	public:
+		PDFProgram& operator=(const PDFProgram& pdfProgram) = default;
+		PDFProgram& operator=(PDFProgram&& pdfProgram) noexcept = default;
+
+	public:
+		static PDFProgram Load(const std::string_view& programPath);
+
+	public:
+		double PDF(double x) const;
+		double CDF(double x) const;
+		double ICDF(double x) const;
+
+	private:
+		double GetValue(const std::string_view& command, double x) const;
 	};
 }
