@@ -33,6 +33,13 @@ namespace StatSim {
 	bool Interval::IsEndOpen() const noexcept {
 		return m_IsEndOpen;
 	}
+
+	bool Interval::IsElement(double value) const noexcept {
+		const double differenceFromBegin = value - m_Begin;
+		const double differenceFromEnd = m_End - value;
+		return (m_IsBeginOpen ? differenceFromBegin > 0 : differenceFromBegin >= 0) &&
+			(m_IsEndOpen ? differenceFromEnd > 0 : differenceFromEnd >= 0);
+	}
 }
 
 namespace StatSim {
