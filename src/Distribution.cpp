@@ -43,13 +43,24 @@ namespace StatSim {
 }
 
 namespace StatSim {
-	RandomVariable::RandomVariable(Interval interval, double distance) noexcept
-		: m_Interval(interval), m_Distance(distance) {
-		assert(distance >= 0);
+	RandomVariable::RandomVariable(Interval interval, double center, double distance) noexcept
+		: m_Interval(interval), m_Center(center), m_Distance(distance) {}
+
+	RandomVariable RandomVariable::Discrete(Interval interval, double center, double distance) {
+		assert(interval.IsElement(center));
+		assert(distance > 0);
+
+		return { interval, center, distance };
+	}
+	RandomVariable RandomVariable::Continuous(Interval interval) {
+		return { interval, 0, 0 };
 	}
 
 	Interval RandomVariable::GetInterval() const noexcept {
 		return m_Interval;
+	}
+	double RandomVariable::GetCenter() const noexcept {
+		return m_Center;
 	}
 	double RandomVariable::GetDistance() const noexcept {
 		return m_Distance;
@@ -86,7 +97,7 @@ namespace StatSim {
 		return oss.str();
 	}
 	RandomVariable BinomialDistribution::GetRandomVariable() const noexcept {
-		return { { 0.0, (double)GetTryCount() }, 1 };
+		return RandomVariable::Discrete({ 0, (double)GetTryCount() }, 0, 1);
 	}
 	Distribution* BinomialDistribution::Copy() const {
 		return new BinomialDistribution(GetTryCount(), GetProbability());
@@ -123,7 +134,7 @@ namespace StatSim {
 		return oss.str();
 	}
 	RandomVariable NormalDistribution::GetRandomVariable() const noexcept {
-		return { Interval::Real, 0 };
+		return RandomVariable::Continuous();
 	}
 	Distribution* NormalDistribution::Copy() const {
 		return new NormalDistribution(GetMean(), GetStandardDeviation());

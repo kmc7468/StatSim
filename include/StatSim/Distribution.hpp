@@ -37,10 +37,12 @@ namespace StatSim {
 	class RandomVariable final {
 	private:
 		Interval m_Interval;
-		double m_Distance;
+		double m_Center, m_Distance;
+
+	private:
+		RandomVariable(Interval interval, double center, double distance) noexcept;
 
 	public:
-		RandomVariable(Interval interval, double distance) noexcept;
 		RandomVariable(const RandomVariable& randomVariable) noexcept = default;
 		~RandomVariable() = default;
 
@@ -48,7 +50,12 @@ namespace StatSim {
 		RandomVariable& operator=(const RandomVariable& randomVariable) = default;
 
 	public:
+		static RandomVariable Discrete(Interval interval, double center, double distance);
+		static RandomVariable Continuous(Interval interval = Interval::Real);
+
+	public:
 		Interval GetInterval() const noexcept;
+		double GetCenter() const noexcept;
 		double GetDistance() const noexcept;
 		bool IsDiscrete() const noexcept;
 		bool IsContinuous() const noexcept;
