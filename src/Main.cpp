@@ -5,6 +5,8 @@
 
 template<typename T>
 T ReadInput(const char* name);
+template<>
+std::string ReadInput<std::string>(const char* name);
 int ReadAction(const char* name, int max, const std::string_view& actions);
 
 int main() {
@@ -12,15 +14,25 @@ int main() {
 	std::cout << std::fixed;
 
 	// 1. 모집단 생성
-	const int populationSize = ReadInput<int>("모집단의 크기");
+	// 1-1. 모집단 생성 방식
+	const int populationGenerationMethod = ReadAction("모집단 생성 방식", 2, "1. 확률분포에 따라 생성하기\n2. 파일에서 불러오기");
+	std::string populationPath;
+	if (populationGenerationMethod == 2) {
+		std::cin.ignore();
+		populationPath = ReadInput<std::string>("파일 경로");
+	}
 
+	// 1-2. 모집단 확률분포
+	StatSim::DistributionGenerator* distributionGenerator = nullptr;
 	switch (ReadAction("확률변수 유형", 2, "1. 이산확률변수\n2. 연속확률변수")) {
 	case 1:
 		switch (ReadAction("확률분포", 1, "1. 이항분포")) {
 		case 1: {
-			const int tryCount = ReadInput<int>("시도 횟수");
-			const double probability = ReadInput<double>("사건의 확률");
-			simulator.GeneratePopulation(populationSize, new StatSim::BinomialDistribution(tryCount, probability));
+			distributionGenerator = new StatSim::BinomialDistributionGenerator();
+			if (populationGenerationMethod == 1) {
+				distributionGenerator->SetParameter("TryCount", ReadInput<int>("시도 횟수"));
+				distributionGenerator->SetParameter("Probability", ReadInput<double>("사건의 확률"));
+			}
 			break;
 		}
 		}
@@ -29,14 +41,25 @@ int main() {
 	case 2:
 		switch (ReadAction("확률분포", 1, "1. 정규분포")) {
 		case 1: {
-			const double mean = ReadInput<double>("모평균");
-			const double standardDeviation = ReadInput<double>("모표준편차");
-			simulator.GeneratePopulation(populationSize, new StatSim::NormalDistribution(mean, standardDeviation));
+			distributionGenerator = new StatSim::NormalDistributionGenerator();
+			if (populationGenerationMethod == 1) {
+				distributionGenerator->SetParameter("Mean", ReadInput<int>("모평균"));
+				distributionGenerator->SetParameter("StandardDeviation", ReadInput<double>("모표준편차"));
+			}
 			break;
 		}
 		}
 		break;
 	}
+
+	// 1-3. 모집단 생성
+	if (populationGenerationMethod == 1) {
+		const int populationSize = ReadInput<int>("모집단의 크기");
+		simulator.GeneratePopulation(populationSize, distributionGenerator->Generate());
+	} else {
+		simulator.LoadPopulation(populationPath, distributionGenerator);
+	}
+	delete distributionGenerator;
 
 	// 2. 동작
 	while (true) {
@@ -45,7 +68,7 @@ int main() {
 
 		std::cout << "----------\n동작 대상: " << data->GetName() << '\n';
 		if (simulator.IsPopulationSelected()) {
-			switch (ReadAction("동작", 6, "1. 출력\n2. 확률분포\n3. 전수조사\n4. 표본 목록\n5. 표본 추출\n6. 표본 선택")) {
+			switch (ReadAction("동작", 8, "1. 출력\n2. 확률분포\n3. 전수조사\n4. 표본 목록\n5. 표본 추출\n6. 표본 선택\n7. 표본평균의 분포\n8. 표본평균의 분포 저장")) {
 			case 1:
 				simulator.PrintSelectedData();
 				std::cout << '\n';
@@ -91,20 +114,6 @@ int main() {
 						}
 						firstSample = nullptr;
 					}
-
-					StatSim::Population* const sampleMeans = population->CreateSampleMeanPopulation(size);
-					StatSim::Distribution* const sampleMeansDistribution = sampleMeans->GetDistribution();
-
-					const double mathMean = sampleMeansDistribution->GetMean(), statMean = sampleMeans->GetMean(), errMean = statMean - mathMean;
-					std::cout << "표본평균의 수학적 평균: " << mathMean << "\n표본평균의 통계적 평균: " << statMean << "(오차 " << errMean << ")\n";
-
-					const double mathVariance = sampleMeansDistribution->GetVariance(), statVariance = sampleMeans->GetVariance(),
-						errVariance = statVariance - mathVariance;
-					std::cout << "표본평균의 수학적 분산: " << mathVariance << "\n표본평균의 통계적 분산: " << statVariance << "(오차 " << errVariance << ")\n";
-
-					const double mathStandardDeviation = sampleMeansDistribution->GetStandardDeviation(), statStandardDeviation = sampleMeans->GetStandardDeviation(),
-						errStandardDeviation = statStandardDeviation - mathStandardDeviation;
-					std::cout << "표본평균의 수학적 표준편차: " << mathStandardDeviation << "\n표본평균의 통계적 표준편차: " << statStandardDeviation << "(오차 " << errStandardDeviation << ")\n";
 				}
 				break;
 			}
@@ -153,6 +162,58 @@ int main() {
 				}
 
 				simulator.SelectSample(index);
+				break;
+			}
+
+			case 7: {
+				const int size = ReadInput<int>("표본의 크기");
+				if (size < 1 || size > data->GetSize()) {
+					std::cout << "올바르지 않은 크기입니다.\n";
+					break;
+				}
+
+				StatSim::Population* const population = static_cast<StatSim::Population*>(data);
+				const auto samples = population->GetSamples();
+				if (samples.find(size) == samples.end()) {
+					std::cout << "해당 크기의 표본이 존재하지 않습니다.\n";
+					break;
+				}
+
+				StatSim::Population* const sampleMeans = population->CreateSampleMeanPopulation(size);
+				StatSim::Distribution* const sampleMeansDistribution = sampleMeans->GetDistribution();
+
+				const double mathMean = sampleMeansDistribution->GetMean(), statMean = sampleMeans->GetMean(), errMean = statMean - mathMean;
+				std::cout << "표본평균의 수학적 평균: " << mathMean << "\n표본평균의 통계적 평균: " << statMean << "(오차 " << errMean << ")\n";
+
+				const double mathVariance = sampleMeansDistribution->GetVariance(), statVariance = sampleMeans->GetVariance(),
+					errVariance = statVariance - mathVariance;
+				std::cout << "표본평균의 수학적 분산: " << mathVariance << "\n표본평균의 통계적 분산: " << statVariance << "(오차 " << errVariance << ")\n";
+
+				const double mathStandardDeviation = sampleMeansDistribution->GetStandardDeviation(), statStandardDeviation = sampleMeans->GetStandardDeviation(),
+					errStandardDeviation = statStandardDeviation - mathStandardDeviation;
+				std::cout << "표본평균의 수학적 표준편차: " << mathStandardDeviation << "\n표본평균의 통계적 표준편차: " << statStandardDeviation << "(오차 " << errStandardDeviation << ")\n";
+				break;
+			}
+
+			case 8: {
+				const int size = ReadInput<int>("표본의 크기");
+				if (size < 1 || size > data->GetSize()) {
+					std::cout << "올바르지 않은 크기입니다.\n";
+					break;
+				}
+
+				StatSim::Population* const population = static_cast<StatSim::Population*>(data);
+				const auto samples = population->GetSamples();
+				if (samples.find(size) == samples.end()) {
+					std::cout << "해당 크기의 표본이 존재하지 않습니다.\n";
+					break;
+				}
+
+				StatSim::Population* const sampleMeans = population->CreateSampleMeanPopulation(size);
+
+				std::cin.ignore();
+				const std::string path = ReadInput<std::string>("파일의 경로");
+				sampleMeans->Save(path);
 				break;
 			}
 			}
@@ -210,6 +271,14 @@ T ReadInput(const char* name) {
 	std::cout << name << " >>> ";
 	T result;
 	return std::cin >> result, result;
+}
+template<>
+std::string ReadInput<std::string>(const char* name) {
+	std::cout << name << " >>> ";
+
+	std::string result;
+	std::getline(std::cin, result);
+	return result;
 }
 int ReadAction(const char* name, int max, const std::string_view& actions) {
 	std::cout << name << '\n' << actions;

@@ -240,6 +240,8 @@ namespace StatSim {
 			m_Mean = value;
 		} else if (name == "Variance") {
 			m_StandardDeviation = std::sqrt(value);
+		} else if (name == "StandardDeviation") {
+			m_StandardDeviation = value;
 		} else {
 			assert(false);
 		}
