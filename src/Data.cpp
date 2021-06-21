@@ -66,6 +66,12 @@ namespace StatSim {
 		return std::sqrt(GetVariance());
 	}
 
+	double Data::GetProbability(double begin, double end) const noexcept {
+		return std::count_if(m_Data.begin(), m_Data.end(), [&](double value) {
+			return begin <= value && value <= end;
+		}) / static_cast<double>(m_Data.size());
+	}
+
 	std::vector<double>::const_iterator Data::begin() const {
 		return m_Data.begin();
 	}

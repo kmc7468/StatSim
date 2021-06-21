@@ -36,6 +36,8 @@ namespace StatSim {
 		virtual double GetVariance() const;
 		virtual double GetStandardDeviation() const;
 
+		double GetProbability(double begin, double end) const noexcept;
+
 	protected:
 		std::vector<double>::const_iterator begin() const;
 		std::vector<double>::const_iterator end() const;

@@ -121,6 +121,24 @@ namespace StatSim {
 	double BinomialDistribution::Generate() {
 		return m_Distribution(g_Random);
 	}
+	double BinomialDistribution::GetProbability(double begin, double end) const {
+		double result = 0;
+		for (int i = static_cast<int>(std::ceil(begin)); i <= static_cast<int>(std::floor(end)); ++i) {
+			static const auto combination = [](int n, int r) {
+				long long result = 1;
+				for (int i = 0; i < r; ++i) {
+					result *= n - i;
+				}
+				for (int i = 0; i < r; ++i) {
+					result /= i + 1;
+				}
+				return result;
+			};
+
+			result += combination(GetTryCount(), i) * std::pow(GetProbability(), i) * std::pow(1 - GetProbability(), GetTryCount() - i);
+		}
+		return result;
+	}
 	int BinomialDistribution::GetTryCount() const noexcept {
 		return m_Distribution.t();
 	}
@@ -157,6 +175,12 @@ namespace StatSim {
 
 	double NormalDistribution::Generate() {
 		return m_Distribution(g_Random);
+	}
+	double NormalDistribution::GetProbability(double begin, double end) const {
+		static const auto cdf = [](double value) {
+			return 0.5 * std::erfc(-value * std::sqrt(0.5));
+		};
+		return cdf((end - GetMean()) / GetStandardDeviation()) - cdf((begin - GetMean()) / GetStandardDeviation());
 	}
 }
 

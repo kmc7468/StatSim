@@ -86,6 +86,7 @@ namespace StatSim {
 		virtual double GetStandardDeviation() const;
 
 		virtual double Generate() = 0;
+		virtual double GetProbability(double begin, double end) const = 0;
 	};
 
 	class BinomialDistribution final : public Distribution {
@@ -110,6 +111,7 @@ namespace StatSim {
 		virtual double GetVariance() const override;
 
 		virtual double Generate() override;
+		virtual double GetProbability(double begin, double end) const override;
 		int GetTryCount() const noexcept;
 		double GetProbability() const noexcept;
 	};
@@ -136,6 +138,7 @@ namespace StatSim {
 		virtual double GetStandardDeviation() const override;
 
 		virtual double Generate() override;
+		virtual double GetProbability(double begin, double end) const override;
 	};
 }
 
