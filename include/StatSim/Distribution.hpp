@@ -1,6 +1,7 @@
 #pragma once
 
 #include <numeric>
+#include <optional>
 #include <random>
 #include <string>
 #include <string_view>
@@ -165,5 +166,59 @@ namespace StatSim {
 
 	private:
 		double GetValue(const std::string_view& command, double x) const;
+	};
+}
+
+namespace StatSim {
+	class DistributionGenerator {
+	public:
+		DistributionGenerator() noexcept = default;
+		DistributionGenerator(const DistributionGenerator&) = delete;
+		virtual ~DistributionGenerator() = default;
+
+	public:
+		DistributionGenerator& operator=(const DistributionGenerator&) = delete;
+
+	public:
+		virtual void SetParameter(const std::string& name, double value) = 0;
+		virtual Distribution* Generate() const = 0;
+	};
+
+	class BinomialDistributionGenerator final : public DistributionGenerator {
+	private:
+		std::optional<int> m_TryCount;
+		std::optional<double> m_Probability;
+		std::optional<double> m_Mean;
+		std::optional<double> m_Variance;
+
+	public:
+		BinomialDistributionGenerator() noexcept = default;
+		BinomialDistributionGenerator(const BinomialDistributionGenerator&) = delete;
+		virtual ~BinomialDistributionGenerator() override = default;
+
+	public:
+		BinomialDistributionGenerator& operator=(const BinomialDistributionGenerator&) = delete;
+
+	public:
+		virtual void SetParameter(const std::string& name, double value) override;
+		virtual Distribution* Generate() const override;
+	};
+
+	class NormalDistributionGenerator final : public DistributionGenerator {
+	private:
+		std::optional<double> m_Mean;
+		std::optional<double> m_StandardDeviation;
+
+	public:
+		NormalDistributionGenerator() noexcept = default;
+		NormalDistributionGenerator(const NormalDistributionGenerator&) = delete;
+		virtual ~NormalDistributionGenerator() override = default;
+
+	public:
+		NormalDistributionGenerator& operator=(const NormalDistributionGenerator&) = delete;
+
+	public:
+		virtual void SetParameter(const std::string& name, double value) override;
+		virtual Distribution* Generate() const override;
 	};
 }

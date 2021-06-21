@@ -153,11 +153,20 @@ namespace StatSim {
 			new NormalDistribution(GetDistribution()->GetMean(), GetDistribution()->GetStandardDeviation() / std::sqrt(size)));
 	}
 
-	Population Population::Load(const std::string& path, Distribution* distribution) {
+	Population Population::Load(const std::string& path, DistributionGenerator* distributionGenerator) {
 		std::ifstream file(path);
 		if (!file) throw std::runtime_error("failed to open the file");
 
-		return { { std::istream_iterator<double>(file), std::istream_iterator<double>() }, distribution };
+		std::vector<double> data{ std::istream_iterator<double>(file), std::istream_iterator<double>() };
+
+		const double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
+		const double variance = std::accumulate(data.begin(), data.end(), 0.0, [&](double sum, double x) {
+			return sum + std::pow(x - mean, 2);
+		}) / data.size();
+		distributionGenerator->SetParameter("Mean", mean);
+		distributionGenerator->SetParameter("Variance", variance);
+
+		return { std::move(data), distributionGenerator->Generate() };
 	}
 	void Population::Save(const std::string& path) const {
 		std::ofstream file(path);

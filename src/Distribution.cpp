@@ -205,3 +205,51 @@ namespace StatSim {
 		return std::stod(output);
 	}
 }
+
+namespace StatSim {
+	void BinomialDistributionGenerator::SetParameter(const std::string& name, double value) {
+		if (name == "TryCount") {
+			m_TryCount = static_cast<int>(value);
+		} else if (name == "Probability") {
+			m_Probability = value;
+		} else if (name == "Mean") {
+			m_Mean = value;
+		} else if (name == "Variance") {
+			m_Variance = value;
+		} else {
+			assert(false);
+		}
+	}
+	Distribution* BinomialDistributionGenerator::Generate() const {
+		if (m_TryCount && m_Probability) {
+			return new BinomialDistribution(*m_TryCount, *m_Probability);
+		} else if (m_Mean && m_Variance) {
+			const double q = *m_Variance / *m_Mean;
+			const int n = static_cast<int>(*m_Mean / (1 - q));
+			return new BinomialDistribution(n, 1 - q);
+		} else {
+			assert(false);
+			return nullptr;
+		}
+	}
+}
+
+namespace StatSim {
+	void NormalDistributionGenerator::SetParameter(const std::string& name, double value) {
+		if (name == "Mean") {
+			m_Mean = value;
+		} else if (name == "Variance") {
+			m_StandardDeviation = std::sqrt(value);
+		} else {
+			assert(false);
+		}
+	}
+	Distribution* NormalDistributionGenerator::Generate() const {
+		if (m_Mean && m_StandardDeviation) {
+			return new NormalDistribution(*m_Mean, *m_StandardDeviation);
+		} else {
+			assert(false);
+			return nullptr;
+		}
+	}
+}

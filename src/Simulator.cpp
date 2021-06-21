@@ -11,6 +11,10 @@ namespace StatSim {
 		m_Population = new Population(size, distribution);
 		SelectPopulation();
 	}
+	void Simulator::LoadPopulation(const std::string& path, DistributionGenerator* distributionGenerator) {
+		m_Population = new Population(Population::Load(path, distributionGenerator));
+		SelectPopulation();
+	}
 
 	Data* Simulator::GetSelectedData() noexcept {
 		return m_SelectedData;

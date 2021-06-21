@@ -75,7 +75,7 @@ namespace StatSim {
 		int GetSampleCount() const noexcept;
 		Population* CreateSampleMeanPopulation(int size) const;
 
-		static Population Load(const std::string& path, Distribution* distribution);
+		static Population Load(const std::string& path, DistributionGenerator* distributionGenerator);
 		void Save(const std::string& path) const;
 	};
 

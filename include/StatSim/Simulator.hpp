@@ -21,6 +21,7 @@ namespace StatSim {
 
 	public:
 		void GeneratePopulation(int size, Distribution* distribution);
+		void LoadPopulation(const std::string& path, DistributionGenerator* distributionGenerator);
 
 		Data* GetSelectedData() noexcept;
 		void SelectPopulation() noexcept;
