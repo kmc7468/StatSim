@@ -68,7 +68,8 @@ int main() {
 
 		std::cout << "----------\n동작 대상: " << data->GetName() << '\n';
 		if (simulator.IsPopulationSelected()) {
-			switch (ReadAction("동작", 8, "1. 출력\n2. 확률분포\n3. 전수조사\n4. 표본 목록\n5. 표본 추출\n6. 표본 선택\n7. 표본평균의 분포\n8. 표본평균의 분포 저장")) {
+			switch (ReadAction("동작", 10, "1. 출력\n2. 확률분포\n3. 전수조사\n4. 확률 계산\n5. 표본 목록\n"
+				"6. 표본 추출\n7. 표본 선택\n8. 표본평균의 분포\n9. 표본평균의 분포 저장\n10. 모평균 추정 적중 확률 계산")) {
 			case 1:
 				simulator.PrintSelectedData();
 				std::cout << '\n';
@@ -92,6 +93,17 @@ int main() {
 			}
 
 			case 4: {
+				std::cout << "P(a<=X<=b)의 값을 계산합니다.\n";
+				const double a = ReadInput<double>("a의 값");
+				const double b = ReadInput<double>("b의 값");
+
+				const double mathProbability = distribution->GetProbability(a, b), statProbability = data->GetProbability(a, b),
+					errProbability = statProbability - mathProbability;
+				std::cout << "수학적 확률: " << mathProbability << "\n통계적 확률: " << statProbability << "(오차 " << errProbability << ")\n";
+				break;
+			}
+
+			case 5: {
 				StatSim::Population* const population = static_cast<StatSim::Population*>(data);
 				const auto samples = population->GetSamples();
 				for (const auto& [size, samples] : samples) {
@@ -118,7 +130,7 @@ int main() {
 				break;
 			}
 
-			case 5: {
+			case 6: {
 				const int size = ReadInput<int>("표본의 크기");
 				if (size < 1 || size > data->GetSize()) {
 					std::cout << "올바르지 않은 크기입니다.\n";
@@ -152,7 +164,7 @@ int main() {
 				break;
 			}
 
-			case 6: {
+			case 7: {
 				StatSim::Population* const population = static_cast<StatSim::Population*>(data);
 
 				const int index = ReadInput<int>("표본의 번호");
@@ -165,7 +177,7 @@ int main() {
 				break;
 			}
 
-			case 7: {
+			case 8: {
 				const int size = ReadInput<int>("표본의 크기");
 				if (size < 1 || size > data->GetSize()) {
 					std::cout << "올바르지 않은 크기입니다.\n";
@@ -195,7 +207,7 @@ int main() {
 				break;
 			}
 
-			case 8: {
+			case 9: {
 				const int size = ReadInput<int>("표본의 크기");
 				if (size < 1 || size > data->GetSize()) {
 					std::cout << "올바르지 않은 크기입니다.\n";
