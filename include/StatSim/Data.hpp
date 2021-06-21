@@ -4,6 +4,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace StatSim {
@@ -103,5 +104,7 @@ namespace StatSim {
 		int GetIndex() const noexcept;
 
 		virtual double GetVariance() const override;
+
+		std::pair<Interval, double> GetConfidenceLevel(double k) const;
 	};
 }

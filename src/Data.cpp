@@ -8,7 +8,6 @@
 #include <numeric>
 #include <stdexcept>
 #include <random>
-#include <utility>
 
 namespace StatSim {
 	Data::Data(int size, Distribution* distribution)
@@ -205,5 +204,17 @@ namespace StatSim {
 
 	double Sample::GetVariance() const {
 		return GetDeviationSum(GetMean()) / (GetSize() - 1);
+	}
+
+	std::pair<Interval, double> Sample::GetConfidenceLevel(double k) const {
+		assert(k > 0);
+
+		static const auto cdf = [](double value) {
+			return 0.5 * std::erfc(-value * std::sqrt(0.5));
+		};
+
+		const double m = GetMean();
+		const double c = k * GetStandardDeviation() / std::sqrt(GetSize());
+		return { { m - c, false, m + c, false }, cdf(k) - cdf(-k) };
 	}
 }

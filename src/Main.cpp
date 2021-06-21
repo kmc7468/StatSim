@@ -228,6 +228,39 @@ int main() {
 				sampleMeans->Save(path);
 				break;
 			}
+
+			case 10: {
+				const double k = ReadInput<double>("신뢰 상수");
+
+				StatSim::Population* const population = static_cast<StatSim::Population*>(data);
+				const auto samples = population->GetSamples();
+				if (samples.size() == 0) {
+					std::cout << "표본이 없습니다.\n";
+					break;
+				}
+
+				const double mean = population->GetMean();
+
+				int count = 0;
+				int numberOfSamples = 0;
+				double reliability = 0;
+				for (const auto& [size, samples] : samples) {
+					for (const auto& sample : samples) {
+						const auto& [confidenceLevel, reliabilityTemp] = sample->GetConfidenceLevel(k);
+						if (reliability == 0) {
+							reliability = reliabilityTemp;
+						}
+						if (confidenceLevel.IsElement(mean)) {
+							++count;
+						}
+						++numberOfSamples;
+					}
+				}
+
+				const double hit = count / static_cast<double>(numberOfSamples), error = hit - reliability;
+				std::cout << "신뢰도: " << reliability << "\n적중 확률: " << hit << "(오차 " << error << ")\n";
+				break;
+			}
 			}
 		} else {
 			switch (ReadAction("동작", 5, "1. 출력\n2. 확률분포\n3. 표본조사\n4. 모평균 추정\n5. 모집단 선택")) {
