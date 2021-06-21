@@ -74,6 +74,9 @@ namespace StatSim {
 		std::map<int, std::vector<StatSim::Sample*>> GetSamples();
 		int GetSampleCount() const noexcept;
 		Population* CreateSampleMeanPopulation(int size) const;
+
+		static Population Load(const std::string& path, Distribution* distribution);
+		void Save(const std::string& path) const;
 	};
 
 	class Sample final : public Data {

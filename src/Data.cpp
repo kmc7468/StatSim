@@ -3,8 +3,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <fstream>
 #include <iterator>
 #include <numeric>
+#include <stdexcept>
 #include <random>
 #include <utility>
 
@@ -149,6 +151,21 @@ namespace StatSim {
 		std::sort(sampleMeans.begin(), sampleMeans.end());
 		return new Population(std::move(sampleMeans),
 			new NormalDistribution(GetDistribution()->GetMean(), GetDistribution()->GetStandardDeviation() / std::sqrt(size)));
+	}
+
+	Population Population::Load(const std::string& path, Distribution* distribution) {
+		std::ifstream file(path);
+		if (!file) throw std::runtime_error("failed to open the file");
+
+		return { { std::istream_iterator<double>(file), std::istream_iterator<double>() }, distribution };
+	}
+	void Population::Save(const std::string& path) const {
+		std::ofstream file(path);
+		if (!file) throw std::runtime_error("failed to open the file");
+
+		for (int i = 0; i < GetSize(); ++i) {
+			file << (*this)[i] << '\n';
+		}
 	}
 }
 
