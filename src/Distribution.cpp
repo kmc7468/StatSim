@@ -125,6 +125,10 @@ namespace StatSim {
 		double result = 0;
 		for (int i = static_cast<int>(std::ceil(begin)); i <= static_cast<int>(std::floor(end)); ++i) {
 			static const auto combination = [](int n, int r) {
+				if (n - r < r) {
+					r = n - r;
+				}
+
 				long long result = 1;
 				for (int i = 0; i < r; ++i) {
 					result *= n - i;
