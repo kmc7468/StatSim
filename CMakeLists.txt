@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.15.0)
 project(StatSim)
 
 include(CheckIPOSupported)
@@ -17,6 +17,10 @@ file(GLOB_RECURSE SOURCE_LIST "./src/*.cpp")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "./bin")
 
 add_executable(${PROJECT_NAME} ${SOURCE_LIST})
+
+set(Boost_INCLUDE_DIR "")
+find_package(Boost REQUIRED)
+target_link_libraries(StatSim PRIVATE Boost::headers)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	check_ipo_supported(RESULT isIPOSupported)
