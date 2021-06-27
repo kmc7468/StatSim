@@ -112,9 +112,9 @@ namespace StatSim {
 		std::vector<double> sample;
 		if (enableReplacement) {
 			std::uniform_int_distribution<> distribution(0, GetSize() - 1);
-			std::for_each_n(std::back_inserter(sample), size, [&](auto& x) {
-				*x = (*this)[distribution(g_Random)];
-			});
+			for (int i = 0; i < size; ++i) {
+				sample.push_back(distribution(g_Random));
+			}
 		} else {
 			std::sample(begin(), end(), std::back_inserter(sample), size, g_Random);
 		}

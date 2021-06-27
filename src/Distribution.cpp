@@ -217,6 +217,11 @@ namespace StatSim {
 	}
 
 	double PDFProgram::GetValue(const std::string_view& command, double x) const {
+#ifndef _WIN32
+#		define _popen popen
+#		define _pclose pclose
+#endif
+
 		std::ostringstream commandGenerator;
 		commandGenerator << m_ProgramPath << ' ' << command << ' ' << std::fixed << x;
 
