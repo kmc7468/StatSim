@@ -1,5 +1,7 @@
 #include <StatSim/Distribution.hpp>
 
+#include <StatSim/Math.hpp>
+
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -122,24 +124,12 @@ namespace StatSim {
 		return m_Distribution(g_Random);
 	}
 	double BinomialDistribution::GetProbability(double begin, double end) const {
+		const int beginInt = static_cast<int>(std::ceil(begin));
+		const int endInt = static_cast<int>(std::floor(end));
+
 		double result = 0;
-		for (int i = static_cast<int>(std::ceil(begin)); i <= static_cast<int>(std::floor(end)); ++i) {
-			static const auto combination = [](int n, int r) {
-				if (n - r < r) {
-					r = n - r;
-				}
-
-				long long result = 1;
-				for (int i = 0; i < r; ++i) {
-					result *= n - i;
-				}
-				for (int i = 0; i < r; ++i) {
-					result /= i + 1;
-				}
-				return result;
-			};
-
-			result += combination(GetTryCount(), i) * std::pow(GetProbability(), i) * std::pow(1 - GetProbability(), GetTryCount() - i);
+		for (int i = beginInt; i <= endInt; ++i) {
+			result += BinomialPMF(GetTryCount(), i, GetProbability());
 		}
 		return result;
 	}
@@ -181,10 +171,7 @@ namespace StatSim {
 		return m_Distribution(g_Random);
 	}
 	double NormalDistribution::GetProbability(double begin, double end) const {
-		static const auto cdf = [](double value) {
-			return 0.5 * std::erfc(-value * std::sqrt(0.5));
-		};
-		return cdf((end - GetMean()) / GetStandardDeviation()) - cdf((begin - GetMean()) / GetStandardDeviation());
+		return NormalCDF(end, GetMean(), GetStandardDeviation()) - NormalCDF(begin, GetMean(), GetStandardDeviation());
 	}
 }
 
